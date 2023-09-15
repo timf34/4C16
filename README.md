@@ -12,4 +12,4 @@
 
 **Push**
 - Drag and drop the files back into the lab folder in `4c16-labs/code`
-- Run the "Commit and Push" and "Push to Server" cells :relieved:
+- Run the "Commit and Push" and "Push to Server" cells :relaxed:
