@@ -1,5 +1,9 @@
 # Lab 1: Linear Regression (corresponding to lecture handout 1)
+import datetime
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+
 
 # This function computes the polynomial of order 'order' corresponding to a least-squares fit
 # to the data (x, y), where 'y' contains the observed values and 'x' contains the x-coordinate
@@ -91,8 +95,6 @@ def mean_squared_error(y1, y2):
 # EXERCISE 4: return the number of the best order for the supplied
 # data (see the notebook).
 def question_4():
-    # Ok so to get the best order for the supplied data, we need to:
-    # TODO: use `Lab 1.ipynb` to work and actually find the best fit order, then just hard code it back to here
 
     # Note: this was just got by observing the graphs in the notebook and finding the lowest loss on the test set
     # and the corresponding polynomial order
@@ -123,8 +125,41 @@ def print_q4_data() -> None:
 
 
 def q5_data():
-    pass
+    # Load data and check the data types of the columns
+    df = pd.read_csv('SN_d_tot_2005_V2.0.csv', sep=',', header=None)
+    df.dtypes
 
+    # Creating new dataset ignore redundant data
+    dates = pd.date_range(start='2005-01-01', end='2023-08-31')
+    df_new = pd.DataFrame({'Time': dates, 'Datefraction': df.iloc[:, 3], 'Values': df.iloc[:, 4]})
+
+    # Check the first 5 observations
+    print(df_new.head(5))
+
+    # We will use data from 2005 to 2023, plot to check data
+    fig, ax = plt.subplots()
+    ax.plot(df_new["Time"], df_new["Values"])
+    ax.set_xlim([datetime.date(2005, 1, 1), datetime.date(2023, 8, 31)])
+    ax.set_title('International sunspot number $S_n$', fontstyle='italic')
+    ax.set_ylabel('Sunspot number $S_n$')
+    ax.set_xlabel('Time (years)')
+    ax.text(12000, -200, 'Source: WDC-SILSO, Royal Observatory of Belgium, Brussels')
+
+    return df_new
+
+# TODO: finish off Q5, just need to fit the data. Probs best to just straight up work int he Colab. Easist
+
+
+# def q5_plot_polynomial_fit_wgt(x, y, w):
+#     u = x
+#     v = predict(u, w)
+#
+#     plt.plot(x, y, 'o', label="input data")
+#     plt.plot(u, v, '-', label="polynomial fit")
+#     plt.ylabel('y')
+#     plt.xlabel('x')
+#     plt.legend()
+#     plt.show()
 
 def main():
     pass
