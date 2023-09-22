@@ -55,7 +55,7 @@ def linear_regression(X, y, eps=0):
 
     # EXERCISE 2: implement Tikhonov regularisation.
     # See lecture handout 1, slide 38.
-    # print("Eps: " + str(eps))
+    print("Eps: " + str(eps))
     #
     # <add 'eps' times the identity matrix to M>
     # Hints:
@@ -65,6 +65,11 @@ def linear_regression(X, y, eps=0):
     # The number of rows in a matrix 'A' is then 'A.shape[0]' (or 'len(A)')
     # You can add matrices with '+' -- so you will update 'M' with 'M = M + <amount> * <identity>'
     # Note that the amount of regularization is denoted 'alpha' in the slides but here it's 'eps'.
+
+    identity_matrix = np.identity(X.shape[1])
+
+    M = M + eps*identity_matrix
+
     theta = np.dot(np.linalg.inv(M), np.dot(X.transpose(), y))
     return theta
 
@@ -73,9 +78,56 @@ def mean_squared_error(y1, y2):
     # You can use '-' to compute the elementwise difference of numpy vectors (i.e. y1 - y2).
     # You can use '**' for elementwise exponentiation of a numpy vector.
     # You can use the numpy function 'mean' to compute the mean of a vector.
-    return 0  # replace this with your answer.
+    vector_diff = y1 - y2
+
+    vector_diff_squred = vector_diff**2
+
+    sum_of_squared_diff = sum(vector_diff_squred)
+
+    mse = sum_of_squared_diff / len(y1)
+
+    return mse  # replace this with your answer.
 
 # EXERCISE 4: return the number of the best order for the supplied
 # data (see the notebook).
 def question_4():
-    return 0   # replace '0' with your answer.
+    # Ok so to get the best order for the supplied data, we need to:
+    # TODO: use `Lab 1.ipynb` to work and actually find the best fit order, then just hard code it back to here
+
+    # Note: this was just got by observing the graphs in the notebook and finding the lowest loss on the test set
+    # and the corresponding polynomial order
+    return 3
+
+
+def q4_data():
+    # Load the data
+    data = np.loadtxt('lab_1.data', delimiter=',')
+
+    # Split it into two equal sets, for training and test.
+    num_points = data.shape[1]
+    set_size = num_points // 2
+    training_x = data[0, 0:set_size]
+    training_y = data[1, 0:set_size]
+    test_x = data[0, set_size:]
+    test_y = data[1, set_size:]
+    return training_x, training_y, test_x, test_y
+
+def print_q4_data() -> None:
+    trainingx, trainingy, testx, testy = q4_data()
+    print(f"trainingx: {trainingx}")
+    print(f"tx: {testx}")
+    print(f"ty: {testy}")
+    print(f"trainingx.shape: {trainingx.shape}")
+    print(f"tx.shape: {testx.shape}")
+    print(f"ty.shape: {testy.shape}")
+
+
+def q5_data():
+    pass
+
+
+def main():
+    pass
+
+if __name__ == '__main__':
+    main()
