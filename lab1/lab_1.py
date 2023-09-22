@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from typing import List, Dict
+
 
 # This function computes the polynomial of order 'order' corresponding to a least-squares fit
 # to the data (x, y), where 'y' contains the observed values and 'x' contains the x-coordinate
@@ -124,42 +126,36 @@ def print_q4_data() -> None:
     print(f"ty.shape: {testy.shape}")
 
 
-def q5_data():
-    # Load data and check the data types of the columns
-    df = pd.read_csv('SN_d_tot_2005_V2.0.csv', sep=',', header=None)
-    df.dtypes
 
-    # Creating new dataset ignore redundant data
-    dates = pd.date_range(start='2005-01-01', end='2023-08-31')
-    df_new = pd.DataFrame({'Time': dates, 'Datefraction': df.iloc[:, 3], 'Values': df.iloc[:, 4]})
+# *Question 5*
+# Note: this won't work here in this script, but in Francois's notebook, this will work at the end for Q5. Finds
+# the params for the model with the best fit -> order=10, epsilon=0
 
-    # Check the first 5 observations
-    print(df_new.head(5))
+# To get the marks, type in the following `best_poly_model = lab_1.LS_poly(data_x_train, data_y_train, 10, 0)`
 
-    # We will use data from 2005 to 2023, plot to check data
-    fig, ax = plt.subplots()
-    ax.plot(df_new["Time"], df_new["Values"])
-    ax.set_xlim([datetime.date(2005, 1, 1), datetime.date(2023, 8, 31)])
-    ax.set_title('International sunspot number $S_n$', fontstyle='italic')
-    ax.set_ylabel('Sunspot number $S_n$')
-    ax.set_xlabel('Time (years)')
-    ax.text(12000, -200, 'Source: WDC-SILSO, Royal Observatory of Belgium, Brussels')
-
-    return df_new
-
-# TODO: finish off Q5, just need to fit the data. Probs best to just straight up work int he Colab. Easist
-
-
-# def q5_plot_polynomial_fit_wgt(x, y, w):
-#     u = x
-#     v = predict(u, w)
+# def poly_mse_order() -> None:
+#     """
+#     Find the best poly fit (measured by lowest MSE loss) for a range of orders
+#     (1-10) and regularization epsilons (0-10)
+#     """
+#     orders: List[int] = [i for i in range(1, 21)]
+#     epsilons: List[int] = [i for i in range(0, 21)]
+#     loss_records: List[Dict[str, int or float]] = []
 #
-#     plt.plot(x, y, 'o', label="input data")
-#     plt.plot(u, v, '-', label="polynomial fit")
-#     plt.ylabel('y')
-#     plt.xlabel('x')
-#     plt.legend()
-#     plt.show()
+#     for order in orders:
+#         for epsilon in epsilons:
+#             val_loss: float = poly_mse_train_val(data_x_train, data_y_train, data_x_valid, data_y_valid, order, epsilon)
+#             loss_records.append({"order": order, "epsilon": epsilon, "loss": val_loss})
+#             print(f"MSE Loss for order {order} and epsilon {epsilon} is: {val_loss}")
+#
+#     # Find the record with the minimum loss
+#     best_record: Dict[str, int or float] = min(loss_records, key=lambda x: x["loss"])
+#
+#     print(f"Best order is {best_record['order']} with epsilon {best_record['epsilon']}. Minimum MSE Loss: {best_record['loss']}")
+#
+#
+# poly_mse_order()
+
 
 def main():
     pass
