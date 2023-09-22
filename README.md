@@ -7,7 +7,7 @@
     - Enter the lab number and run the cells. 
 
 **Working on the labs**
-- Copy the lab files from `4c16-labs/code` to Pycharm in the `4c16` project 
+- Copy the lab files from `4c16-labs/code` (_this is a different folder to `4thYear`_) to Pycharm in the `4c16` project 
 - Work on them locally
 
 **Push**
