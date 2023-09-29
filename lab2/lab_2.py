@@ -82,7 +82,7 @@ def gradient(w, X, y):
 # What learning rate is best for the data set supplied in the notebook?
 # eg. return 45 or return 0.1 (doesn't have to be super precise)
 def question_3():
-    return 0 # <- change this value
+    return 10
 
 #
 # #### EXERCISE 4 ####
@@ -90,9 +90,8 @@ def question_3():
 # Write a function predict_class which uses weights 'w', observations
 # 'X', and a threshold 't' to classify the data.
 def predict_class(w, X, t):
-    # replace with a vector of comparisons of a call to predict with 't':
-    return np.zeros((X.shape[0],1))
-    
+    probabilities = predict(w, X)
+    return probabilities > t
 
 #
 # #### EXERCISE 5 ####
@@ -102,7 +101,7 @@ def predict_class(w, X, t):
 # What is the accuracy of your classifier for a threshold of 0.75
 
 def question_5():
-    return 0 # <- update this with actual accuracy
+    return 0.9698 # <- update this with actual accuracy
 
 #
 # #### EXERCISE 6 ####
@@ -113,7 +112,13 @@ def question_5():
 #       and the other coefficients from log_reg.coef_.
 
 def question_6():
-    return 0 # <- change this with estimated bias for logit of class=0
+    """
+    Code:
+    bias_class_0 = log_reg.intercept_
+    print(bias_class_0)
+    # Class 0 is [0]th index
+    """
+    return 8.693509076063185 # <- change this with estimated bias for logit of class=0
 
 # #### EXERCISE 7 ####
 # 
