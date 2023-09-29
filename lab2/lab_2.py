@@ -118,7 +118,7 @@ def question_6():
     print(bias_class_0)
     # Class 0 is [0]th index
     """
-    return 8.693509076063185 # <- change this with estimated bias for logit of class=0
+    return 8.69 # <- change this with estimated bias for logit of class=0
 
 # #### EXERCISE 7 ####
 # 
@@ -143,10 +143,72 @@ def question_6():
 # Thus make sure that the random_state is kept to random_state = 11 everywhere,
 # and that the split kept to 0.3. (ie. keep original cells)
 
+"""
+Q7 code
+
+# #### EXERCISE 7 ####
+# 
+# In this exercise, you must find the best pair of features in the iris dataset.
+#
+# To find this pair, you will consider every possible pair and reduce the 
+# input features to only that pair (and ignore the other two features). 
+#
+# hint:
+# iterate through all possible pairs and for each pair:
+# 1. modify both training and test sets to only include the two considered features
+# 2. train a multinomial logistic regression model based on this reduced feature set
+# 3. make prediction on the reduced test set 
+# 4. report accuracy for that pair
+#
+# you can work in this notebook, but you need to report the best pair 
+# and the accuracy in question_7 in lab_2.py
+
+from sklearn.metrics import accuracy_score
+
+def evaluate_pair(features):
+    # 1. Modify both training and test sets to only include the two considered features
+    X_train_pair = trainX[:, features]
+    X_test_pair = testX[:, features]
+
+    # 2. Train a multinomial logistic regression model based on this reduced feature set
+    log_reg = LogisticRegression(solver='newton-cg', multi_class='multinomial', random_state=11)
+    log_reg.fit(X_train_pair, trainY)
+
+    # 3. Make predictions on the reduced test set
+    y_pred = log_reg.predict(X_test_pair)
+
+    # 4. Report accuracy for that pair
+    acc = accuracy_score(testY, y_pred)
+    
+    return acc
+
+# Evaluate all possible feature pairs
+best_acc = 0
+best_features = None
+for i in range(4):
+    for j in range(i+1, 4):
+        acc = evaluate_pair((i, j))
+        if acc > best_acc:
+            best_acc = acc
+            best_features = (i, j)
+
 def question_7():
     return {
-      'Features': (0,1), # replace with the best pair
-      'Acc': 0.77777     # replace with the accuracy for that pair
+      'Features': best_features,
+      'Acc': best_acc
+      }
+
+print(question_7())
+
+
+"""
+
+
+
+def question_7():
+    return {
+      'Features': (0,2), # replace with the best pair
+      'Acc': 0.9556     # replace with the accuracy for that pair
       }    
 
 
