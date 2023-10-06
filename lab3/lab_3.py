@@ -6,8 +6,8 @@ def question_1():
     #
     # Yes, you could try them each in turn..!
     # But don't do that.
-    return ""   # Placeholder
-    # return "Nearest Neighbors"
+    # return ""   # Placeholder
+    return "Nearest Neighbors"
     # return "Logistic Regression"
     # return "Linear SVM"
     # return "RBF SVM"
@@ -16,7 +16,7 @@ def question_1():
 def question_2():
     # This function returns a single number,
     # corresponding to the answer.
-    return -1 # Replace with your answer.
+    return 1.35 # Note: multiple values have the same lowest value
 
 def question_3():
     # This function returns a single number,
