@@ -9,9 +9,17 @@
 # The last layer essentially does the classification using multonomial regression
 # based on these new features.
 
+
+# Notes: kept overfitting on the data, and spent ages trying different combos.
+# Adding data augmentation got it working asap!
+# Find out how people got it working without augmentation otherwise.
+
 from keras.layers import Flatten, Dense, Dropout, BatchNormalization, Input, LeakyReLU
 from keras.optimizers import SGD, Adam
 from keras.preprocessing.image import ImageDataGenerator
+
+# L2 regularization strength
+l2_strength = 1e-4
 
 inputs = keras.layers.Input(shape=(32, 32, 3))
 
@@ -47,6 +55,14 @@ model.compile(optimizer=opt,
 
 # Model summary
 model.summary()
+
+# Data Augmentation
+datagen = ImageDataGenerator(
+    rotation_range=15,   # randomly rotate images in the range (degrees, 0 to 180)
+    width_shift_range=0.1,   # randomly shift images horizontally (fraction of total width)
+    height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
+    horizontal_flip=True,  # randomly flip images
+)
 
 if (model.count_params() > 5000000):
     raise Exception("Your model is unecessarily complex, scale down!")
