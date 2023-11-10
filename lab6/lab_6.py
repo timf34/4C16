@@ -84,7 +84,7 @@ def augment_data(X_train, y_train, batch_size):
     # Create two separate instances of ImageDataGenerator.
     # One for the images and one for the masks.
     data_gen_args = dict(
-        rotation_range=10,
+        rotation_range=360,
         width_shift_range=0.1,
         height_shift_range=0.1,
         shear_range=0.1,
