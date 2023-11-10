@@ -2,6 +2,7 @@
 
 from keras.layers import Dense, Input, Dropout, Conv2D, BatchNormalization, MaxPooling2D, UpSampling2D, concatenate
 from keras.models import Sequential, Model
+from keras import backend as K
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.model_selection import train_test_split
@@ -80,6 +81,29 @@ def create_model(input_shape):
     return Model(inputs=[inputs], outputs=[outputs])
 
 
+def precision(y_true, y_pred):
+    """Precision metric."""
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+    precision = true_positives / (predicted_positives + K.epsilon())
+    return precision
+
+
+def recall(y_true, y_pred):
+    """Recall metric."""
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+    recall = true_positives / (possible_positives + K.epsilon())
+    return recall
+
+
+def f1_score(y_true, y_pred):
+    """Calculate F1 score."""
+    p = precision(y_true, y_pred)
+    r = recall(y_true, y_pred)
+    return 2*((p*r)/(p+r+K.epsilon()))
+
+
 def augment_data(X_train, y_train, batch_size):
     # Create two separate instances of ImageDataGenerator.
     # One for the images and one for the masks.
@@ -118,7 +142,7 @@ def main():
     model = create_model(input_shape)
 
     # Compile the model
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy', precision, recall, f1_score
 
     # Setup callbacks
     early_stopping = EarlyStopping(monitor='val_loss', patience=10, verbose=1)
