@@ -142,7 +142,7 @@ def main():
     model = create_model(input_shape)
 
     # Compile the model
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy', precision, recall, f1_score
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy', precision, recall, f1_score])
 
     # Setup callbacks
     early_stopping = EarlyStopping(monitor='val_loss', patience=10, verbose=1)
