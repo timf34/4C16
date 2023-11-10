@@ -1,6 +1,11 @@
+#TODO: add F1 score accuracy metric
+
 from keras.layers import Dense, Input, Dropout, Conv2D, BatchNormalization, MaxPooling2D, UpSampling2D, concatenate
 from keras.models import Sequential, Model
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.preprocessing.image import ImageDataGenerator
+from sklearn.model_selection import train_test_split
+
 import numpy as np
 import matplotlib.pyplot as plt
 import random
@@ -75,10 +80,77 @@ def create_model(input_shape):
     return Model(inputs=[inputs], outputs=[outputs])
 
 
+def augment_data(X_train, y_train, batch_size):
+    # Create two separate instances of ImageDataGenerator.
+    # One for the images and one for the masks.
+    data_gen_args = dict(
+        rotation_range=10,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        shear_range=0.1,
+        zoom_range=0.1,
+        horizontal_flip=True,
+        fill_mode='nearest'
+    )
+
+    image_datagen = ImageDataGenerator(**data_gen_args)
+    mask_datagen = ImageDataGenerator(**data_gen_args)
+
+    # Provide the same seed to both generators to ensure the transformations for images and masks are the same
+    seed = 1
+    image_generator = image_datagen.flow(X_train, batch_size=batch_size, seed=seed)
+    mask_generator = mask_datagen.flow(y_train, batch_size=batch_size, seed=seed)
+
+    # Combine generators into one which yields image and masks
+    train_generator = zip(image_generator, mask_generator)
+    return train_generator
+
 
 def main():
     # Load the data
     X, y = load_data()  # X and y shape: (701, 128, 128, 3)
+
+    # Split the data into training and validation sets
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Create the model
+    input_shape = X_train.shape[1:]  # This gets the shape of the input data
+    model = create_model(input_shape)
+
+    # Compile the model
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+    # Setup callbacks
+    early_stopping = EarlyStopping(monitor='val_loss', patience=10, verbose=1)
+    model_checkpoint = ModelCheckpoint('best_model.h5', monitor='val_loss', save_best_only=True, verbose=1)
+
+    # Data augmentation
+    train_generator = augment_data(X_train, y_train, batch_size=32)
+
+    # Fit the model
+    history = model.fit(
+        train_generator,
+        steps_per_epoch=len(X_train) // 32,  # Number of batches per epoch
+        validation_data=(X_val, y_val),
+        epochs=50,
+        callbacks=[early_stopping, model_checkpoint]
+    )
+
+    # Plot training history
+    plt.figure(figsize=(12, 4))
+    plt.subplot(1, 2, 1)
+    plt.plot(history.history['loss'], label='Training Loss')
+    plt.plot(history.history['val_loss'], label='Validation Loss')
+    plt.title('Loss Over Epochs')
+    plt.legend()
+
+    plt.subplot(1, 2, 2)
+    plt.plot(history.history['accuracy'], label='Training Accuracy')
+    plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+    plt.title('Accuracy Over Epochs')
+    plt.legend()
+
+    plt.show()
 
 
 if __name__ == '__main__':
