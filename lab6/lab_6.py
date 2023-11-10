@@ -1,5 +1,5 @@
-from keras.layers import Dense, Flatten, Dropout, MaxPool2D, Conv2D
-from keras.models import Sequential
+from keras.layers import Dense, Input, Dropout, Conv2D, BatchNormalization, MaxPooling2D, UpSampling2D, concatenate
+from keras.models import Sequential, Model
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,80 +8,77 @@ import random
 DATA_PATH: str = "./dataset"
 
 
-class CustomModel:
-    def __init__(self):
-        self.model = self.create_model()
+def load_data():
+    X, y = [], []
 
-    @staticmethod
-    def create_model():
-        model = Sequential()
+    for _type in ['benign', 'malignant', 'normal']:
+        X_type = np.load(f'{DATA_PATH}/{_type}/input.npy')
+        y_type = np.load(f'{DATA_PATH}/{_type}/target.npy')
 
-        # First convolutional block
-        model.add(Conv2D(32, (3, 3), padding='same', activation='relu', input_shape=(256, 256, 3)))
-        model.add(Conv2D(32, (3, 3), padding='same', activation='relu'))
-        model.add(MaxPool2D(pool_size=(2, 2)))
-        model.add(Dropout(0.2))
+        # Assuming that the shapes of X_type and y_type are compatible for concatenation
+        if len(X) == 0:
+            X, y = X_type, y_type
+        else:
+            X = np.concatenate((X, X_type), axis=0)
+            y = np.concatenate((y, y_type), axis=0)
 
-        # Second convolutional block
-        model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
-        model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
-        model.add(MaxPool2D(pool_size=(2, 2)))
-        model.add(Dropout(0.2))
-
-        # Third convolutional block
-        model.add(Conv2D(128, (3, 3), padding='same', activation='relu'))
-        model.add(MaxPool2D(pool_size=(2, 2)))
-        model.add(Dropout(0.2))
-
-        # Flatten and dense layers
-        model.add(Flatten())
-        model.add(Dense(128, activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(Dense(64, activation='relu'))
-        model.add(Dropout(0.2))
-
-        return model
-
-    def train(self, train_data, train_labels, epochs=10, batch_size=32):
-        # Data augmentation
-        datagen = ImageDataGenerator(
-            rotation_range=20,
-            width_shift_range=0.2,
-            height_shift_range=0.2,
-            shear_range=0.2,
-            zoom_range=0.2,
-            horizontal_flip=True,
-            fill_mode='nearest'
-        )
-
-        self.model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-
-        # Training loop
-        self.model.fit(datagen.flow(train_data, train_labels, batch_size=batch_size),
-                       steps_per_epoch=len(train_data) / batch_size, epochs=epochs)
+    return X, y
 
 
-class DataVisualizer:
-    @staticmethod
-    def visualize_data():
-        for _type in ['benign', 'malignant', 'normal']:
-            X = np.load(f'{DATA_PATH}/{_type}/input.npy')
-            y = np.load(f'{DATA_PATH}/{_type}/target.npy')
-            randomExample = random.randint(0, X.shape[0] - 1)
-            fig, axs = plt.subplots(1, 2)
-            axs[0].imshow(X[randomExample])
-            axs[0].title.set_text('Input')
-            axs[1].imshow(y[randomExample])
-            axs[1].title.set_text('Output')
-            fig.suptitle(_type.upper())
-            plt.subplots_adjust(top=1.1)
-            plt.show()
+def conv_block(input_tensor, num_filters):
+    """Function to add 2 convolutional layers with the parameters passed to it"""
+    # first layer
+    x = Conv2D(num_filters, (3, 3), padding='same')(input_tensor)
+    x = BatchNormalization()(x)
+    x = Conv2D(num_filters, (3, 3), padding='same')(x)
+    x = BatchNormalization()(x)
+
+    return x
+
+
+def encoder_block(input_tensor, num_filters):
+    """Function to add 2 convolutional layers with the parameters passed to it and then perform max pooling"""
+    x = conv_block(input_tensor, num_filters)
+    p = MaxPooling2D((2, 2))(x)
+    return x, p
+
+
+def decoder_block(input_tensor, concat_tensor, num_filters):
+    """Function to perform up-convolution, concatenate it with the corresponding encoder block output and then add 2 convolutional layers"""
+    x = UpSampling2D((2, 2))(input_tensor)
+    x = concatenate([x, concat_tensor], axis=-1)
+    x = conv_block(x, num_filters)
+    return x
+
+
+def create_model(input_shape):
+    inputs = Input(input_shape)
+
+    # Encoder
+    x1, p1 = encoder_block(inputs, 64)
+    x2, p2 = encoder_block(p1, 128)
+    x3, p3 = encoder_block(p2, 256)
+    x4, p4 = encoder_block(p3, 512)
+
+    # Bridge
+    b = conv_block(p4, 1024)
+
+    # Decoder
+    d1 = decoder_block(b, x4, 512)
+    d2 = decoder_block(d1, x3, 256)
+    d3 = decoder_block(d2, x2, 128)
+    d4 = decoder_block(d3, x1, 64)
+
+    # Output
+    outputs = Conv2D(1, (1, 1), activation='sigmoid')(d4)
+
+    return Model(inputs=[inputs], outputs=[outputs])
+
 
 
 def main():
-    DataVisualizer.visualize_data()
-    model = CustomModel()
-    model.train(np.random.rand(100, 256, 256, 3), np.random.rand(100), epochs=5)
+    # Load the data
+    X, y = load_data()  # X and y shape: (701, 128, 128, 3)
 
 
 if __name__ == '__main__':
